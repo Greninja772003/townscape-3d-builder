@@ -1,9 +1,7 @@
-
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import GridCell from "@/components/GridCell";
 import BuildingModal from "@/components/BuildingModal";
-import Controls from "@/components/Controls";
 
 // Constants
 const ROWS = 4;
@@ -158,13 +156,6 @@ const Index = () => {
           />
         ))}
       </div>
-
-      <Controls
-        onSave={saveGridState}
-        onLoad={loadGridState}
-        onClear={clearGrid}
-        onExport={exportGridData}
-      />
 
       {isModalOpen && (
         <BuildingModal
