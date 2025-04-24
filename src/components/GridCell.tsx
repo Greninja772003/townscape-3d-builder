@@ -35,7 +35,7 @@ const GridCell: React.FC<GridCellProps> = ({
           title={building.name}
           style={{
             backgroundImage: `url('${building.imageUrl}')`,
-            transform: `rotateX(-${fixedRotation}deg) translateZ(20px) scale(${building.scale})`,
+            transform: `rotateX(-${fixedRotation}deg) translateZ(40px) scale(${building.scale || 1})`,
           }}
         ></div>
       )}
