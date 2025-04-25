@@ -12,13 +12,18 @@ const ROWS = 4;
 const COLS = 7;
 const FIXED_ROTATION = 30;
 
+// Merged cells configuration
+const MERGED_CELLS = [
+  { primary: 18, secondary: 19 }
+];
+
 export interface Building {
   imageUrl: string;
   cellId: number;
   name: string;
   scale: number;
   fileName?: string | null;
-  redirectUrl?: string;  // New field for redirection
+  redirectUrl?: string;
 }
 
 type BuildingsState = {
@@ -32,13 +37,21 @@ const Index = () => {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
 
-  // Create grid cells array
+  // Create grid cells array with merged cell handling
   const gridCells = Array.from({ length: ROWS * COLS }, (_, i) => {
     const cellId = i + 1;
     const row = Math.floor(i / COLS);
     const col = i % COLS;
-    return { cellId, row, col };
-  });
+    
+    // Check if this cell should be skipped (secondary part of a merged cell)
+    const isSecondary = MERGED_CELLS.some(merge => merge.secondary === cellId);
+    if (isSecondary) return null;
+    
+    // Check if this cell is the primary part of a merged cell
+    const isMerged = MERGED_CELLS.some(merge => merge.primary === cellId);
+    
+    return { cellId, row, col, isMerged };
+  }).filter(Boolean); // Filter out null entries
 
   // Check if user is authenticated when component mounts
   useEffect(() => {
@@ -79,7 +92,8 @@ const Index = () => {
     cellId: number,
     name: string,
     scale: number = 1,
-    fileName: string | null = null
+    fileName: string | null = null,
+    redirectUrl?: string
   ) => {
     const newBuilding = {
       imageUrl,
@@ -87,11 +101,19 @@ const Index = () => {
       name,
       scale,
       fileName,
+      redirectUrl,
     };
 
     setBuildings((prev) => {
       const updated = { ...prev };
       updated[`cell-${cellId}`] = newBuilding;
+      
+      // If this is a merged cell, apply the building to both cells
+      const mergedCell = MERGED_CELLS.find(m => m.primary === cellId);
+      if (mergedCell) {
+        updated[`cell-${mergedCell.secondary}`] = { ...newBuilding, cellId: mergedCell.secondary };
+      }
+      
       return updated;
     });
   };
@@ -102,6 +124,13 @@ const Index = () => {
     setBuildings((prev) => {
       const updated = { ...prev };
       delete updated[`cell-${cellId}`];
+      
+      // If this is a merged cell, remove the building from both cells
+      const mergedCell = MERGED_CELLS.find(m => m.primary === cellId);
+      if (mergedCell) {
+        delete updated[`cell-${mergedCell.secondary}`];
+      }
+      
       return updated;
     });
     
@@ -166,6 +195,7 @@ const Index = () => {
             building={buildings[`cell-${cell.cellId}`]}
             fixedRotation={FIXED_ROTATION}
             isEditable={isAdmin}
+            isMerged={cell.isMerged}
           />
         ))}
       </div>

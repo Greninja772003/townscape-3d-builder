@@ -56,7 +56,7 @@ const BuildingModal: React.FC<BuildingModalProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md w-[95%] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
             {hasExistingBuilding ? "Modify Building in Cell" : "Add Building to Grid Cell"}

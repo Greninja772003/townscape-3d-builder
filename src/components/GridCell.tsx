@@ -10,6 +10,7 @@ interface GridCellProps {
   building?: Building;
   fixedRotation: number;
   isEditable?: boolean;
+  isMerged?: boolean;
 }
 
 const GridCell: React.FC<GridCellProps> = ({
@@ -20,6 +21,7 @@ const GridCell: React.FC<GridCellProps> = ({
   building,
   fixedRotation,
   isEditable = false,
+  isMerged = false,
 }) => {
   const navigate = useNavigate();
 
@@ -27,6 +29,7 @@ const GridCell: React.FC<GridCellProps> = ({
     if (isEditable) {
       onClick(cellId);
     } else if (building?.redirectUrl) {
+      e.preventDefault();
       if (building.redirectUrl.startsWith('http')) {
         window.open(building.redirectUrl, '_blank');
       } else {
@@ -37,15 +40,15 @@ const GridCell: React.FC<GridCellProps> = ({
 
   return (
     <div 
-      className={`grid-cell ${isEditable ? 'editable' : ''} ${building?.redirectUrl ? 'cursor-pointer' : ''}`}
+      className={`grid-cell ${isEditable ? 'editable' : ''} ${building?.redirectUrl ? 'cursor-pointer' : ''} ${isMerged ? 'merged-cell' : ''}`}
       id={`cell-${cellId}`}
       data-row={row}
       data-col={col}
       onClick={handleClick}
+      style={isMerged ? { gridColumn: 'span 2' } : undefined}
     >
-      <div className="inner-content">
-        {cellId}
-      </div>
+      {/* Remove cell number display */}
+      <div className="inner-content"></div>
       {building && (
         <div 
           className="building"
