@@ -1,7 +1,11 @@
+
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import GridCell from "@/components/GridCell";
 import BuildingModal from "@/components/BuildingModal";
+import AuthModal from "@/components/AuthModal";
+import { Button } from "@/components/ui/button";
+import { isAuthenticated, logoutUser, STORAGE_KEYS } from "@/utils/buildingData";
 
 // Constants
 const ROWS = 4;
@@ -24,6 +28,8 @@ const Index = () => {
   const [buildings, setBuildings] = useState<BuildingsState>({});
   const [selectedCell, setSelectedCell] = useState<number | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   // Create grid cells array
   const gridCells = Array.from({ length: ROWS * COLS }, (_, i) => {
@@ -33,7 +39,32 @@ const Index = () => {
     return { cellId, row, col };
   });
 
+  // Check if user is authenticated when component mounts
+  useEffect(() => {
+    checkAuthStatus();
+  }, []);
+
+  // Check authentication status
+  const checkAuthStatus = () => {
+    setIsAdmin(isAuthenticated());
+  };
+
+  const handleLoginClick = () => {
+    setIsAuthModalOpen(true);
+  };
+
+  const handleLogout = () => {
+    logoutUser();
+    setIsAdmin(false);
+    toast.success("Logged out successfully!");
+  };
+
   const handleCellClick = (cellId: number) => {
+    if (!isAdmin) {
+      toast.error("You must be an administrator to modify the grid!");
+      return;
+    }
+    
     setSelectedCell(cellId);
     setIsModalOpen(true);
   };
@@ -64,70 +95,17 @@ const Index = () => {
     });
   };
 
-  const saveGridState = () => {
-    try {
-      localStorage.setItem("townGridBuildings", JSON.stringify(buildings));
-      toast.success("Layout saved successfully!");
-    } catch (e) {
-      console.error("Failed to save grid state:", e);
-      toast.error("Failed to save layout");
-    }
+  const removeBuilding = (cellId: number) => {
+    if (!isAdmin) return;
+    
+    setBuildings((prev) => {
+      const updated = { ...prev };
+      delete updated[`cell-${cellId}`];
+      return updated;
+    });
+    
+    toast.success("Building removed successfully!");
   };
-
-  const loadGridState = () => {
-    try {
-      const savedState = localStorage.getItem("townGridBuildings");
-      if (savedState) {
-        const savedBuildings = JSON.parse(savedState);
-        
-        // Filter out buildings with blob URLs as they won't persist between sessions
-        const persistableBuildings: BuildingsState = {};
-        Object.entries(savedBuildings).forEach(([key, building]) => {
-          const typedBuilding = building as Building;
-          if (!typedBuilding.imageUrl.startsWith("blob:")) {
-            persistableBuildings[key] = typedBuilding;
-          }
-        });
-
-        setBuildings(persistableBuildings);
-        toast.success("Layout loaded successfully!");
-      }
-    } catch (e) {
-      console.error("Failed to load grid state:", e);
-      toast.error("Failed to load layout");
-    }
-  };
-
-  const clearGrid = () => {
-    if (confirm("Are you sure you want to clear all buildings from the grid?")) {
-      setBuildings({});
-      toast.success("Grid cleared successfully!");
-    }
-  };
-
-  const exportGridData = () => {
-    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(buildings));
-    const downloadAnchorNode = document.createElement("a");
-    downloadAnchorNode.setAttribute("href", dataStr);
-    downloadAnchorNode.setAttribute("download", "town_grid_layout.json");
-    document.body.appendChild(downloadAnchorNode);
-    downloadAnchorNode.click();
-    downloadAnchorNode.remove();
-    toast.success("Layout exported as JSON!");
-  };
-
-  // Handle keyboard shortcuts
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.ctrlKey && event.key === "e") {
-        event.preventDefault();
-        exportGridData();
-      }
-    };
-
-    document.addEventListener("keydown", handleKeyDown);
-    return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [buildings]);
 
   // Load saved state on component mount
   useEffect(() => {
@@ -137,12 +115,45 @@ const Index = () => {
   // Save to localStorage when buildings change
   useEffect(() => {
     if (Object.keys(buildings).length > 0) {
-      localStorage.setItem("townGridBuildings", JSON.stringify(buildings));
+      localStorage.setItem(STORAGE_KEYS.GRID_DATA, JSON.stringify(buildings));
     }
   }, [buildings]);
 
+  const saveGridState = () => {
+    try {
+      localStorage.setItem(STORAGE_KEYS.GRID_DATA, JSON.stringify(buildings));
+      toast.success("Layout saved successfully!");
+    } catch (e) {
+      console.error("Failed to save grid state:", e);
+      toast.error("Failed to save layout");
+    }
+  };
+
+  const loadGridState = () => {
+    try {
+      const savedState = localStorage.getItem(STORAGE_KEYS.GRID_DATA);
+      if (savedState) {
+        setBuildings(JSON.parse(savedState));
+      }
+    } catch (e) {
+      console.error("Failed to load grid state:", e);
+      toast.error("Failed to load layout");
+    }
+  };
+
   return (
     <div className="world-container">
+      <div className="fixed top-4 right-4 flex gap-2 z-50">
+        {isAdmin ? (
+          <>
+            <Button onClick={saveGridState} variant="secondary">Save Layout</Button>
+            <Button onClick={handleLogout} variant="outline">Logout</Button>
+          </>
+        ) : (
+          <Button onClick={handleLoginClick}>Admin Login</Button>
+        )}
+      </div>
+
       <div className="parent" id="grid-container">
         {gridCells.map((cell) => (
           <GridCell
@@ -153,18 +164,29 @@ const Index = () => {
             onClick={handleCellClick}
             building={buildings[`cell-${cell.cellId}`]}
             fixedRotation={FIXED_ROTATION}
+            isEditable={isAdmin}
           />
         ))}
       </div>
 
-      {isModalOpen && (
+      {isModalOpen && selectedCell && (
         <BuildingModal
           isOpen={isModalOpen}
           onClose={closeModal}
           selectedCell={selectedCell}
           onAddBuilding={placeNewBuilding}
+          onRemoveBuilding={() => removeBuilding(selectedCell)}
+          hasExistingBuilding={!!buildings[`cell-${selectedCell}`]}
         />
       )}
+
+      <AuthModal 
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+        onAuthSuccess={() => {
+          setIsAdmin(true);
+        }}
+      />
     </div>
   );
 };

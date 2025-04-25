@@ -8,6 +8,7 @@ interface GridCellProps {
   onClick: (cellId: number) => void;
   building?: Building;
   fixedRotation: number;
+  isEditable?: boolean;
 }
 
 const GridCell: React.FC<GridCellProps> = ({
@@ -17,10 +18,11 @@ const GridCell: React.FC<GridCellProps> = ({
   onClick,
   building,
   fixedRotation,
+  isEditable = false,
 }) => {
   return (
     <div 
-      className="grid-cell" 
+      className={`grid-cell ${isEditable ? 'editable' : ''}`}
       id={`cell-${cellId}`}
       data-row={row}
       data-col={col}
