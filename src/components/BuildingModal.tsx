@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { X } from "lucide-react";
 import { predefinedBuildings } from "@/utils/buildingData";
 
@@ -10,7 +11,7 @@ interface BuildingModalProps {
   isOpen: boolean;
   onClose: () => void;
   selectedCell: number | null;
-  onAddBuilding: (imageUrl: string, cellId: number, name: string, scale: number, fileName?: string | null) => void;
+  onAddBuilding: (imageUrl: string, cellId: number, name: string, scale: number, fileName?: string | null, redirectUrl?: string) => void;
   onRemoveBuilding?: () => void;
   hasExistingBuilding: boolean;
 }
@@ -25,6 +26,7 @@ const BuildingModal: React.FC<BuildingModalProps> = ({
 }) => {
   const [selectedBuildingId, setSelectedBuildingId] = useState<number | null>(null);
   const [buildingScale, setBuildingScale] = useState(1.0);
+  const [redirectUrl, setRedirectUrl] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,7 +36,14 @@ const BuildingModal: React.FC<BuildingModalProps> = ({
     const building = predefinedBuildings.find(b => b.id === selectedBuildingId);
     if (!building) return;
 
-    onAddBuilding(building.imageUrl, selectedCell, building.name, buildingScale);
+    onAddBuilding(
+      building.imageUrl, 
+      selectedCell, 
+      building.name, 
+      buildingScale, 
+      null, 
+      redirectUrl.trim() || undefined
+    );
     resetForm();
     onClose();
   };
@@ -42,6 +51,7 @@ const BuildingModal: React.FC<BuildingModalProps> = ({
   const resetForm = () => {
     setSelectedBuildingId(null);
     setBuildingScale(1.0);
+    setRedirectUrl('');
   };
 
   return (
@@ -92,6 +102,18 @@ const BuildingModal: React.FC<BuildingModalProps> = ({
               className="w-full"
             />
             <div className="text-center text-sm">{buildingScale.toFixed(1)}</div>
+          </div>
+
+          <div className="grid w-full items-center gap-1.5">
+            <Label htmlFor="redirectUrl">Redirect URL (optional):</Label>
+            <Input
+              id="redirectUrl"
+              type="url"
+              placeholder="https://example.com"
+              value={redirectUrl}
+              onChange={(e) => setRedirectUrl(e.target.value)}
+              className="w-full"
+            />
           </div>
 
           <div className="flex justify-between">

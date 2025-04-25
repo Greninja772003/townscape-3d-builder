@@ -18,6 +18,7 @@ export interface Building {
   name: string;
   scale: number;
   fileName?: string | null;
+  redirectUrl?: string;  // New field for redirection
 }
 
 type BuildingsState = {
