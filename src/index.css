@@ -122,6 +122,23 @@
   perspective: 680px;
 }
 
+/* Admin controls panel */
+.admin-controls {
+  position: fixed;
+  top: 80px;
+  left: 20px;
+  background-color: rgba(255, 255, 255, 0.9);
+  padding: 16px;
+  border-radius: 8px;
+  width: 280px;
+  z-index: 50;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.control-group {
+  margin-bottom: 16px;
+}
+
 /* Grid system */
 .parent {
   display: grid;
@@ -137,21 +154,29 @@
   transform: rotateX(30deg) scale(1.2);
   transform-style: preserve-3d;
   transform-origin: center bottom;
+  transition: transform 0.3s ease, margin-bottom 0.3s ease;
 }
 
 /* Responsive grid adjustments */
 @media (max-width: 768px) {
   .parent {
     width: 95%;
-    margin-bottom: 5%;
     transform: rotateX(30deg) scale(0.9);
+  }
+  
+  .admin-controls {
+    width: calc(100% - 40px);
+    top: auto;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    max-width: 400px;
   }
 }
 
 @media (max-width: 480px) {
   .parent {
     width: 98%;
-    margin-bottom: 2%;
     transform: rotateX(30deg) scale(0.7);
   }
 }

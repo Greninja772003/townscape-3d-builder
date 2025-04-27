@@ -2,15 +2,19 @@
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import GridCell from "@/components/GridCell";
-import BuildingModal from "@/components/BuildingModal";
 import AuthModal from "@/components/AuthModal";
 import { Button } from "@/components/ui/button";
 import { isAuthenticated, logoutUser, STORAGE_KEYS } from "@/utils/buildingData";
+import { useNavigate } from "react-router-dom";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { RotateCw } from "lucide-react";
 
 // Constants
 const ROWS = 4;
 const COLS = 7;
-const FIXED_ROTATION = 30;
+const DEFAULT_ROTATION = 30;
+const DEFAULT_SCALE = 1.2;
 
 // Merged cells configuration
 const MERGED_CELLS = [
@@ -30,12 +34,42 @@ type BuildingsState = {
   [key: string]: Building;
 };
 
+type GridStyleState = {
+  rotation: number;
+  scale: number;
+  marginBottom: number;
+};
+
+const DEFAULT_GRID_STYLE: GridStyleState = {
+  rotation: DEFAULT_ROTATION,
+  scale: DEFAULT_SCALE,
+  marginBottom: 10,
+};
+
 const Index = () => {
   const [buildings, setBuildings] = useState<BuildingsState>({});
-  const [selectedCell, setSelectedCell] = useState<number | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [gridStyle, setGridStyle] = useState<GridStyleState>(DEFAULT_GRID_STYLE);
+  const [showRotateAlert, setShowRotateAlert] = useState(false);
+  const navigate = useNavigate();
+  const isMobile = useIsMobile();
+
+  // Check for mobile orientation on mount and orientation change
+  useEffect(() => {
+    if (isMobile) {
+      const checkOrientation = () => {
+        const isPortrait = window.matchMedia("(orientation: portrait)").matches;
+        setShowRotateAlert(isPortrait);
+      };
+      
+      checkOrientation();
+      
+      window.addEventListener("resize", checkOrientation);
+      return () => window.removeEventListener("resize", checkOrientation);
+    } else {
+      setShowRotateAlert(false);
+    }
+  }, [isMobile]);
 
   // Create grid cells array with merged cell handling
   const gridCells = Array.from({ length: ROWS * COLS }, (_, i) => {
@@ -53,117 +87,35 @@ const Index = () => {
     return { cellId, row, col, isMerged };
   }).filter(Boolean); // Filter out null entries
 
-  // Check if user is authenticated when component mounts
-  useEffect(() => {
-    checkAuthStatus();
-  }, []);
-
-  // Check authentication status
-  const checkAuthStatus = () => {
-    setIsAdmin(isAuthenticated());
-  };
-
-  const handleLoginClick = () => {
-    setIsAuthModalOpen(true);
-  };
-
-  const handleLogout = () => {
-    logoutUser();
-    setIsAdmin(false);
-    toast.success("Logged out successfully!");
-  };
-
-  const handleCellClick = (cellId: number) => {
-    if (!isAdmin) {
-      toast.error("You must be an administrator to modify the grid!");
-      return;
-    }
-    
-    setSelectedCell(cellId);
-    setIsModalOpen(true);
-  };
-
-  const closeModal = () => {
-    setIsModalOpen(false);
-  };
-
-  const placeNewBuilding = (
-    imageUrl: string,
-    cellId: number,
-    name: string,
-    scale: number = 1,
-    fileName: string | null = null,
-    redirectUrl?: string
-  ) => {
-    const newBuilding = {
-      imageUrl,
-      cellId,
-      name,
-      scale,
-      fileName,
-      redirectUrl,
-    };
-
-    setBuildings((prev) => {
-      const updated = { ...prev };
-      updated[`cell-${cellId}`] = newBuilding;
-      
-      // If this is a merged cell, apply the building to both cells
-      const mergedCell = MERGED_CELLS.find(m => m.primary === cellId);
-      if (mergedCell) {
-        updated[`cell-${mergedCell.secondary}`] = { ...newBuilding, cellId: mergedCell.secondary };
-      }
-      
-      return updated;
-    });
-  };
-
-  const removeBuilding = (cellId: number) => {
-    if (!isAdmin) return;
-    
-    setBuildings((prev) => {
-      const updated = { ...prev };
-      delete updated[`cell-${cellId}`];
-      
-      // If this is a merged cell, remove the building from both cells
-      const mergedCell = MERGED_CELLS.find(m => m.primary === cellId);
-      if (mergedCell) {
-        delete updated[`cell-${mergedCell.secondary}`];
-      }
-      
-      return updated;
-    });
-    
-    toast.success("Building removed successfully!");
-  };
-
   // Load saved state on component mount
   useEffect(() => {
     loadGridState();
   }, []);
 
-  // Save to localStorage when buildings change
-  useEffect(() => {
-    if (Object.keys(buildings).length > 0) {
-      localStorage.setItem(STORAGE_KEYS.GRID_DATA, JSON.stringify(buildings));
-    }
-  }, [buildings]);
+  // Check authentication status
+  const handleLoginClick = () => {
+    setIsAuthModalOpen(true);
+  };
 
-  const saveGridState = () => {
-    try {
-      localStorage.setItem(STORAGE_KEYS.GRID_DATA, JSON.stringify(buildings));
-      toast.success("Layout saved successfully!");
-    } catch (e) {
-      console.error("Failed to save grid state:", e);
-      toast.error("Failed to save layout");
-    }
+  const handleAdminAccess = () => {
+    navigate('/admin-portal');
+  };
+
+  const handleCellClick = (cellId: number) => {
+    // Non-editable in view mode, do nothing
   };
 
   const loadGridState = () => {
     try {
       const savedState = localStorage.getItem(STORAGE_KEYS.GRID_DATA);
+      const savedStyle = localStorage.getItem(STORAGE_KEYS.GRID_STYLE);
+      
       if (savedState) {
         setBuildings(JSON.parse(savedState));
+      }
+      
+      if (savedStyle) {
+        setGridStyle(JSON.parse(savedStyle));
       }
     } catch (e) {
       console.error("Failed to load grid state:", e);
@@ -171,20 +123,37 @@ const Index = () => {
     }
   };
 
+  const gridTransformStyles = {
+    transform: `rotateX(${gridStyle.rotation}deg) scale(${gridStyle.scale})`,
+    marginBottom: `calc(${gridStyle.marginBottom}% - 15px)`,
+  };
+
   return (
     <div className="world-container">
       <div className="fixed top-4 right-4 flex gap-2 z-50">
-        {isAdmin ? (
-          <>
-            <Button onClick={saveGridState} variant="secondary">Save Layout</Button>
-            <Button onClick={handleLogout} variant="outline">Logout</Button>
-          </>
+        {isAuthenticated() ? (
+          <Button onClick={handleAdminAccess} variant="secondary">Edit Layout</Button>
         ) : (
           <Button onClick={handleLoginClick}>Admin Login</Button>
         )}
       </div>
 
-      <div className="parent" id="grid-container">
+      {showRotateAlert && (
+        <div className="fixed top-20 left-1/2 transform -translate-x-1/2 z-50 w-5/6 max-w-sm">
+          <Alert className="bg-white/90 border-amber-500">
+            <RotateCw className="h-4 w-4 text-amber-500 mr-2" />
+            <AlertDescription>
+              For the best experience, please rotate your device to landscape mode.
+            </AlertDescription>
+          </Alert>
+        </div>
+      )}
+
+      <div 
+        className="parent" 
+        id="grid-container"
+        style={gridTransformStyles}
+      >
         {gridCells.map((cell) => (
           <GridCell
             key={cell.cellId}
@@ -193,30 +162,17 @@ const Index = () => {
             col={cell.col}
             onClick={handleCellClick}
             building={buildings[`cell-${cell.cellId}`]}
-            fixedRotation={FIXED_ROTATION}
-            isEditable={isAdmin}
+            fixedRotation={gridStyle.rotation}
+            isEditable={false}
             isMerged={cell.isMerged}
           />
         ))}
       </div>
 
-      {isModalOpen && selectedCell && (
-        <BuildingModal
-          isOpen={isModalOpen}
-          onClose={closeModal}
-          selectedCell={selectedCell}
-          onAddBuilding={placeNewBuilding}
-          onRemoveBuilding={() => removeBuilding(selectedCell)}
-          hasExistingBuilding={!!buildings[`cell-${selectedCell}`]}
-        />
-      )}
-
       <AuthModal 
         isOpen={isAuthModalOpen}
         onClose={() => setIsAuthModalOpen(false)}
-        onAuthSuccess={() => {
-          setIsAdmin(true);
-        }}
+        onAuthSuccess={handleAdminAccess}
       />
     </div>
   );

@@ -43,7 +43,8 @@ export const verifyPassword = (password: string): boolean => {
 // Local storage keys
 export const STORAGE_KEYS = {
   AUTH_TOKEN: "townbuilder_auth_token",
-  GRID_DATA: "townGridBuildings"
+  GRID_DATA: "townGridBuildings",
+  GRID_STYLE: "townGridStyle"
 };
 
 // Simple token generation for authentication
