@@ -1,5 +1,5 @@
 
-import { Building } from "@/pages/Index";
+import { Building } from "@/types/building";
 import { useNavigate } from "react-router-dom";
 
 interface GridCellProps {
