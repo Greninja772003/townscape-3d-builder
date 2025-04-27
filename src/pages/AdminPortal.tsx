@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import GridCell from "@/components/GridCell";
@@ -6,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { logoutUser, STORAGE_KEYS } from "@/utils/buildingData";
+import { logoutUser, STORAGE_KEYS, isAuthenticated } from "@/utils/buildingData";
 import { useNavigate } from "react-router-dom";
 
 // Constants
@@ -57,6 +58,14 @@ const AdminPortal = () => {
   });
   
   const navigate = useNavigate();
+
+  // Check authentication on mount and when auth status changes
+  useEffect(() => {
+    if (!isAuthenticated()) {
+      navigate('/');
+      toast.error("Authentication required to access admin portal");
+    }
+  }, [navigate]);
 
   // Create grid cells array with merged cell handling
   const gridCells = Array.from({ length: ROWS * COLS }, (_, i) => {

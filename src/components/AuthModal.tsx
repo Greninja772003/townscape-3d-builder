@@ -7,27 +7,31 @@ import { Button } from "@/components/ui/button";
 import { X } from "lucide-react";
 import { toast } from "sonner";
 import { loginUser } from "@/utils/buildingData";
+import { useNavigate } from "react-router-dom";
 
 interface AuthModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onAuthSuccess: () => void;
+  redirectPath?: string;
 }
 
 const AuthModal: React.FC<AuthModalProps> = ({
   isOpen,
   onClose,
-  onAuthSuccess,
+  redirectPath,
 }) => {
   const [password, setPassword] = useState("");
+  const navigate = useNavigate();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
     if (loginUser(password)) {
       toast.success("Authentication successful!");
-      onAuthSuccess();
       onClose();
+      if (redirectPath) {
+        navigate(redirectPath);
+      }
     } else {
       toast.error("Invalid password!");
     }

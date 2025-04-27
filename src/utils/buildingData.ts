@@ -54,7 +54,8 @@ export const generateAuthToken = (): string => {
 
 // Check if user is authenticated
 export const isAuthenticated = (): boolean => {
-  return localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN) !== null;
+  const token = localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN);
+  return token !== null;
 };
 
 // Login user

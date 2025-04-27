@@ -8,11 +8,17 @@ import Index from "./pages/Index";
 import AdminPortal from "./pages/AdminPortal";
 import NotFound from "./pages/NotFound";
 import { isAuthenticated } from "./utils/buildingData";
+import { useEffect } from "react";
 
 const queryClient = new QueryClient();
 
 // Protected Route Component
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+  // Check authentication on component mount
+  useEffect(() => {
+    console.log("Authentication status:", isAuthenticated());
+  }, []);
+  
   return isAuthenticated() ? <>{children}</> : <Navigate to="/" replace />;
 };
 
