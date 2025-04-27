@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import GridCell from "@/components/GridCell";
@@ -38,12 +37,14 @@ type GridStyleState = {
   rotation: number;
   scale: number;
   marginBottom: number;
+  perspective: number;
 };
 
 const DEFAULT_GRID_STYLE: GridStyleState = {
   rotation: DEFAULT_ROTATION,
   scale: DEFAULT_SCALE,
   marginBottom: 10,
+  perspective: 1000,
 };
 
 const AdminPortal = () => {
