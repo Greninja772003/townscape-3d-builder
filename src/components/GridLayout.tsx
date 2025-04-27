@@ -1,4 +1,3 @@
-
 import { Building } from "@/types/building";
 import { ROWS, COLS, MERGED_CELLS } from "@/constants/grid";
 import GridCell from "./GridCell";
@@ -9,6 +8,7 @@ interface GridLayoutProps {
     rotation: number;
     scale: number;
     marginBottom: number;
+    perspective: number;
   };
 }
 
@@ -27,7 +27,7 @@ const GridLayout = ({ buildings, gridStyle }: GridLayoutProps) => {
   }).filter(Boolean);
 
   const gridTransformStyles = {
-    transform: `rotateX(${gridStyle.rotation}deg) scale(${gridStyle.scale})`,
+    transform: `perspective(${gridStyle.perspective}px) rotateX(${gridStyle.rotation}deg) scale(${gridStyle.scale})`,
     marginBottom: `calc(${gridStyle.marginBottom}% - 15px)`,
   };
 
@@ -55,4 +55,3 @@ const GridLayout = ({ buildings, gridStyle }: GridLayoutProps) => {
 };
 
 export default GridLayout;
-

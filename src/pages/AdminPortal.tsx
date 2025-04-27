@@ -188,7 +188,7 @@ const AdminPortal = () => {
   };
 
   const gridTransformStyles = {
-    transform: `rotateX(${gridStyle.rotation}deg) scale(${gridStyle.scale})`,
+    transform: `perspective(${gridStyle.perspective}px) rotateX(${gridStyle.rotation}deg) scale(${gridStyle.scale})`,
     marginBottom: `calc(${gridStyle.marginBottom}% - 15px)`,
   };
 
@@ -221,6 +221,17 @@ const AdminPortal = () => {
             max={2} 
             step={0.1}
             onValueChange={(vals) => setGridStyle(prev => ({...prev, scale: vals[0]}))}
+          />
+        </div>
+        
+        <div className="control-group">
+          <Label>Perspective: {gridStyle.perspective}px</Label>
+          <Slider 
+            value={[gridStyle.perspective]} 
+            min={500} 
+            max={2000} 
+            step={50}
+            onValueChange={(vals) => setGridStyle(prev => ({...prev, perspective: vals[0]}))}
           />
         </div>
         

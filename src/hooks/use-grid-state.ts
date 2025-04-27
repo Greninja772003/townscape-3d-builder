@@ -7,12 +7,14 @@ export interface GridStyleState {
   rotation: number;
   scale: number;
   marginBottom: number;
+  perspective: number;
 }
 
 export const DEFAULT_GRID_STYLE: GridStyleState = {
   rotation: 30,
   scale: 1.2,
   marginBottom: 10,
+  perspective: 1000,
 };
 
 type BuildingsState = {
@@ -49,4 +51,3 @@ export const useGridState = () => {
     gridStyle,
   };
 };
-
