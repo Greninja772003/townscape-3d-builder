@@ -56,6 +56,7 @@ const GridCell: React.FC<GridCellProps> = ({
           style={{
             backgroundImage: `url('${building.imageUrl}')`,
             transform: `rotateX(-${fixedRotation}deg) translateZ(20px) scale(${building.scale})`,
+            backgroundPosition: 'center center', // Changed from bottom to center
           }}
         ></div>
       )}

@@ -8,6 +8,9 @@ export interface GridStyleState {
   scale: number;
   marginBottom: number;
   perspective: number;
+  horizontalPosition: number; // Added this
+  width: number; // Added this
+  orientation: number; // Added this
 }
 
 export const DEFAULT_GRID_STYLE: GridStyleState = {
@@ -15,6 +18,9 @@ export const DEFAULT_GRID_STYLE: GridStyleState = {
   scale: 1.2,
   marginBottom: 10,
   perspective: 1000,
+  horizontalPosition: 50, // Added this
+  width: 68, // Added this
+  orientation: 0, // Added this
 };
 
 type BuildingsState = {
