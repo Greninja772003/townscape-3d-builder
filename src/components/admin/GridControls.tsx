@@ -58,6 +58,17 @@ const GridControls = ({ gridStyle, onStyleChange, onReset }: GridControlsProps) 
           onValueChange={(vals) => onStyleChange({ ...gridStyle, marginBottom: vals[0] })}
         />
       </div>
+
+      <div className="control-group">
+        <Label>Horizontal Position: {gridStyle.horizontalPosition}%</Label>
+        <Slider 
+          value={[gridStyle.horizontalPosition]} 
+          min={0} 
+          max={100} 
+          step={1}
+          onValueChange={(vals) => onStyleChange({ ...gridStyle, horizontalPosition: vals[0] })}
+        />
+      </div>
       
       <Button onClick={onReset} variant="outline" size="sm" className="mt-4">
         Reset to Default

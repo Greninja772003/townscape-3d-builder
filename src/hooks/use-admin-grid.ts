@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Building } from "@/types/building";
 import { toast } from "sonner";
@@ -14,6 +13,7 @@ export type GridStyleState = {
   scale: number;
   marginBottom: number;
   perspective: number;
+  horizontalPosition: number;
 };
 
 export const DEFAULT_GRID_STYLE: GridStyleState = {
@@ -21,6 +21,7 @@ export const DEFAULT_GRID_STYLE: GridStyleState = {
   scale: 1.2,
   marginBottom: 10,
   perspective: 1000,
+  horizontalPosition: 50,
 };
 
 export const useAdminGrid = () => {
