@@ -25,11 +25,11 @@ const AdminGrid = ({ buildings, gridStyle, onCellClick }: AdminGridProps) => {
   }).filter(Boolean);
 
   const gridTransformStyles = {
-    transform: `perspective(${gridStyle.perspective}px) rotateX(${gridStyle.rotation}deg) scale(${gridStyle.scale})`,
+    transform: `perspective(${gridStyle.perspective}px) rotateZ(${gridStyle.orientation}deg) rotateX(${gridStyle.rotation}deg) scale(${gridStyle.scale}) translateX(-50%)`,
     marginBottom: `calc(${gridStyle.marginBottom}% - 15px)`,
+    width: `${gridStyle.width}%`,
     left: `${gridStyle.horizontalPosition}%`,
-    transform: `perspective(${gridStyle.perspective}px) rotateX(${gridStyle.rotation}deg) scale(${gridStyle.scale}) translateX(-50%)`,
-    position: 'relative',
+    position: 'relative' as const,
   };
 
   return (

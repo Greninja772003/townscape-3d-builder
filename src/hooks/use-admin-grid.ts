@@ -14,6 +14,8 @@ export type GridStyleState = {
   marginBottom: number;
   perspective: number;
   horizontalPosition: number;
+  width: number;
+  orientation: number;
 };
 
 export const DEFAULT_GRID_STYLE: GridStyleState = {
@@ -22,6 +24,8 @@ export const DEFAULT_GRID_STYLE: GridStyleState = {
   marginBottom: 10,
   perspective: 1000,
   horizontalPosition: 50,
+  width: 68,
+  orientation: 0,
 };
 
 export const useAdminGrid = () => {

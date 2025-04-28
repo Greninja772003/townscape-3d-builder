@@ -38,11 +38,22 @@ const GridControls = ({ gridStyle, onStyleChange, onReset }: GridControlsProps) 
       </div>
       
       <div className="control-group">
+        <Label>Width: {gridStyle.width}%</Label>
+        <Slider 
+          value={[gridStyle.width]} 
+          min={40} 
+          max={95} 
+          step={1}
+          onValueChange={(vals) => onStyleChange({ ...gridStyle, width: vals[0] })}
+        />
+      </div>
+      
+      <div className="control-group">
         <Label>Perspective: {gridStyle.perspective}px</Label>
         <Slider 
           value={[gridStyle.perspective]} 
           min={500} 
-          max={2000} 
+          max={4000} 
           step={50}
           onValueChange={(vals) => onStyleChange({ ...gridStyle, perspective: vals[0] })}
         />
@@ -67,6 +78,17 @@ const GridControls = ({ gridStyle, onStyleChange, onReset }: GridControlsProps) 
           max={100} 
           step={1}
           onValueChange={(vals) => onStyleChange({ ...gridStyle, horizontalPosition: vals[0] })}
+        />
+      </div>
+
+      <div className="control-group">
+        <Label>Orientation: {gridStyle.orientation}°</Label>
+        <Slider 
+          value={[gridStyle.orientation]} 
+          min={-180} 
+          max={180} 
+          step={5}
+          onValueChange={(vals) => onStyleChange({ ...gridStyle, orientation: vals[0] })}
         />
       </div>
       
