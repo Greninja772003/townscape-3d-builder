@@ -1,18 +1,15 @@
 
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import BuildingModal from "@/components/BuildingModal";
 import GridControls from "@/components/admin/GridControls";
 import AdminGrid from "@/components/admin/AdminGrid";
 import { useAdminGrid } from "@/hooks/use-admin-grid";
-import { logoutUser, isAuthenticated } from "@/utils/buildingData";
 
 const AdminPortal = () => {
   const [selectedCell, setSelectedCell] = useState<number | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const navigate = useNavigate();
   
   const {
     buildings,
@@ -24,17 +21,9 @@ const AdminPortal = () => {
     removeBuilding,
   } = useAdminGrid();
 
-  useEffect(() => {
-    if (!isAuthenticated()) {
-      navigate('/');
-      toast.error("Authentication required to access admin portal");
-    }
-  }, [navigate]);
-
   const handleLogout = () => {
-    logoutUser();
-    navigate('/');
-    toast.success("Logged out successfully!");
+    window.location.href = '/';
+    toast.success("Returned to view mode!");
   };
 
   const handleCellClick = (cellId: number) => {

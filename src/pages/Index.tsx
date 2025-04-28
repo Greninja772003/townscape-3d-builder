@@ -4,28 +4,14 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { useGridState } from "@/hooks/use-grid-state";
 import GridLayout from "@/components/GridLayout";
 import MobileRotateAlert from "@/components/MobileRotateAlert";
+import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { isAuthenticated } from "@/utils/buildingData";
 
 const Index = () => {
   const [showRotateAlert, setShowRotateAlert] = useState(false);
   const isMobile = useIsMobile();
   const { buildings, gridStyle } = useGridState();
   const navigate = useNavigate();
-
-  // Handle keyboard shortcut for admin access (Alt+A)
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.altKey && event.key === 'a') {
-        if (isAuthenticated()) {
-          navigate('/admin-portal');
-        }
-      }
-    };
-    
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [navigate]);
 
   useEffect(() => {
     if (isMobile) {
@@ -43,9 +29,19 @@ const Index = () => {
     }
   }, [isMobile]);
 
+  const goToAdminPortal = () => {
+    navigate('/admin-portal');
+  };
+
   return (
     <div className="world-container">
       {showRotateAlert && <MobileRotateAlert />}
+
+      <div className="fixed top-4 right-4 z-50">
+        <Button onClick={goToAdminPortal} variant="secondary">
+          Admin Portal
+        </Button>
+      </div>
 
       <GridLayout 
         buildings={buildings}
