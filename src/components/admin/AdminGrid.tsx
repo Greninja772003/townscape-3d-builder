@@ -27,6 +27,9 @@ const AdminGrid = ({ buildings, gridStyle, onCellClick }: AdminGridProps) => {
   const gridTransformStyles = {
     transform: `perspective(${gridStyle.perspective}px) rotateX(${gridStyle.rotation}deg) scale(${gridStyle.scale})`,
     marginBottom: `calc(${gridStyle.marginBottom}% - 15px)`,
+    left: `${gridStyle.horizontalPosition}%`,
+    transform: `perspective(${gridStyle.perspective}px) rotateX(${gridStyle.rotation}deg) scale(${gridStyle.scale}) translateX(-50%)`,
+    position: 'relative',
   };
 
   return (
