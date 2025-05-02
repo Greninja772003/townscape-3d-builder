@@ -76,7 +76,8 @@ export const useAdminGrid = () => {
     name: string,
     scale: number = 1,
     fileName: string | null = null,
-    redirectUrl?: string
+    redirectUrl?: string,
+    initialPosition?: {x: number, y: number}
   ) => {
     // Generate a unique ID for the building
     const buildingId = `building-${Date.now()}`;
@@ -89,8 +90,8 @@ export const useAdminGrid = () => {
       fileName,
       redirectUrl,
       position: { 
-        x: window.innerWidth / 2, 
-        y: window.innerHeight / 2,
+        x: initialPosition?.x || window.innerWidth / 2, 
+        y: initialPosition?.y || window.innerHeight / 2,
         rotation: 0
       }
     };

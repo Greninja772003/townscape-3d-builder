@@ -46,6 +46,7 @@ const Index = () => {
       <BuildingCanvas 
         buildings={buildings}
         gridStyle={gridStyle}
+        isEditable={false}
       />
     </div>
   );

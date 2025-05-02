@@ -13,6 +13,7 @@ const AdminPortal = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const isMobile = useIsMobile();
   const [showRotateAlert, setShowRotateAlert] = useState(false);
+  const [newBuildingPos, setNewBuildingPos] = useState<{x: number, y: number} | null>(null);
   
   const {
     buildings,
@@ -34,6 +35,12 @@ const AdminPortal = () => {
   };
 
   const handleAddBuilding = () => {
+    setNewBuildingPos({ x: window.innerWidth / 2, y: window.innerHeight / 2 });
+    setIsModalOpen(true);
+  };
+
+  const handleContextAddBuilding = (x: number, y: number) => {
+    setNewBuildingPos({ x, y });
     setIsModalOpen(true);
   };
 
@@ -59,6 +66,15 @@ const AdminPortal = () => {
       return () => window.removeEventListener("resize", checkOrientation);
     }
   });
+
+  const handleAddBuildingSubmit = (imageUrl: string, _, name: string, scale = 1, fileName = null, redirectUrl?: string) => {
+    if (newBuildingPos) {
+      const id = placeNewBuilding(imageUrl, 0, name, scale, fileName, redirectUrl, newBuildingPos);
+      setIsModalOpen(false);
+      return id;
+    }
+    return "";
+  };
 
   return (
     <div className="world-container">
@@ -90,18 +106,16 @@ const AdminPortal = () => {
         onScaleChange={updateBuildingScale}
         onBuildingSelect={setSelectedBuildingId}
         selectedBuildingId={selectedBuildingId}
+        onAddBuilding={handleContextAddBuilding}
+        onRemoveSelected={handleRemoveBuilding}
       />
 
       {isModalOpen && (
         <BuildingModal
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
-          selectedCell={0} // We don't use cell IDs anymore
-          onAddBuilding={(imageUrl, _, name, scale = 1, fileName, redirectUrl) => {
-            const id = placeNewBuilding(imageUrl, 0, name, scale, fileName, redirectUrl);
-            setIsModalOpen(false);
-            return id;
-          }}
+          selectedCell={0}
+          onAddBuilding={handleAddBuildingSubmit}
           onRemoveBuilding={() => {}}
           hasExistingBuilding={false}
         />
