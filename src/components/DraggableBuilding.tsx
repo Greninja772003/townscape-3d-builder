@@ -29,6 +29,10 @@ const DraggableBuilding: React.FC<DraggableBuildingProps> = ({
   const startScale = useRef(1);
   const startDistance = useRef(0);
 
+  // Ensure default position if it's undefined
+  const safePosition = building.position || { x: 0, y: 0, rotation: 0 };
+  const safeScale = building.scale || 1;
+
   const handleClick = (e: React.MouseEvent) => {
     if (!isEditable && building.redirectUrl) {
       e.preventDefault();
@@ -60,7 +64,7 @@ const DraggableBuilding: React.FC<DraggableBuildingProps> = ({
       const centerX = rect.left + rect.width / 2;
       const centerY = rect.top + rect.height / 2;
       startAngle.current = Math.atan2(e.clientY - centerY, e.clientX - centerX) - 
-        (building.position.rotation * Math.PI / 180);
+        (safePosition.rotation * Math.PI / 180);
     }
     
     e.stopPropagation();
@@ -70,7 +74,7 @@ const DraggableBuilding: React.FC<DraggableBuildingProps> = ({
     if (!isEditable) return;
     
     setIsResizing(true);
-    startScale.current = building.scale;
+    startScale.current = safeScale;
     const rect = buildingRef.current?.getBoundingClientRect();
     if (rect) {
       const centerX = rect.left + rect.width / 2;
@@ -119,8 +123,8 @@ const DraggableBuilding: React.FC<DraggableBuildingProps> = ({
         
         if (onPositionChange) {
           onPositionChange(building.id, {
-            x: building.position.x + dx,
-            y: building.position.y + dy
+            x: safePosition.x + dx,
+            y: safePosition.y + dy
           });
         }
       }
@@ -141,7 +145,7 @@ const DraggableBuilding: React.FC<DraggableBuildingProps> = ({
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
     };
-  }, [building, isRotating, isResizing, onPositionChange, onScaleChange]);
+  }, [building, isRotating, isResizing, onPositionChange, onScaleChange, safePosition]);
 
   // For touch events
   useEffect(() => {
@@ -179,8 +183,8 @@ const DraggableBuilding: React.FC<DraggableBuildingProps> = ({
         
         if (onPositionChange) {
           onPositionChange(building.id, {
-            x: building.position.x + dx,
-            y: building.position.y + dy
+            x: safePosition.x + dx,
+            y: safePosition.y + dy
           });
         }
       } else if (isResizing && e.touches.length === 2) {
@@ -194,7 +198,7 @@ const DraggableBuilding: React.FC<DraggableBuildingProps> = ({
         initialDistance = distance;
         
         if (onScaleChange) {
-          const newScale = Math.max(0.2, Math.min(3, building.scale * scaleFactor));
+          const newScale = Math.max(0.2, Math.min(3, safeScale * scaleFactor));
           onScaleChange(building.id, newScale);
         }
       }
@@ -215,7 +219,7 @@ const DraggableBuilding: React.FC<DraggableBuildingProps> = ({
       element.removeEventListener('touchmove', handleTouchMove);
       element.removeEventListener('touchend', handleTouchEnd);
     };
-  }, [building, isEditable, onPositionChange, onScaleChange]);
+  }, [building, isEditable, onPositionChange, onScaleChange, safePosition, safeScale]);
 
   return (
     <div
@@ -225,7 +229,7 @@ const DraggableBuilding: React.FC<DraggableBuildingProps> = ({
       onMouseDown={handleMouseDown}
       style={{
         backgroundImage: `url('${building.imageUrl}')`,
-        transform: `translate(${building.position.x}px, ${building.position.y}px) rotate(${building.position.rotation}deg) scale(${building.scale})`,
+        transform: `translate(${safePosition.x}px, ${safePosition.y}px) rotate(${safePosition.rotation}deg) scale(${safeScale})`,
         cursor: isEditable ? 'move' : (building.redirectUrl ? 'pointer' : 'default')
       }}
     >

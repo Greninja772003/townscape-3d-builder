@@ -23,11 +23,17 @@ const BuildingContextMenu: React.FC<BuildingContextMenuProps> = ({
   showRemoveOption,
   isEditable
 }) => {
+  // Use the client coordinates to get the precise location
+  // for building placement
   const handleContextMenuAdd = (e: React.MouseEvent) => {
     // Use the coordinates from the context menu event
-    onAdd(e.clientX, e.clientY);
+    const x = e.clientX;
+    const y = e.clientY;
+    console.log("Context menu add at position:", x, y);
+    onAdd(x, y);
   };
 
+  // If not in edit mode, just render children without context menu
   if (!isEditable) {
     return <>{children}</>;
   }

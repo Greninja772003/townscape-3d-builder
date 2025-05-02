@@ -51,12 +51,14 @@ const BuildingCanvas: React.FC<BuildingCanvasProps> = ({
 
   const handleAddBuilding = (x: number, y: number) => {
     if (isEditable && onAddBuilding) {
+      console.log("Adding building at:", x, y);
       onAddBuilding(x, y);
     }
   };
 
   const handleRemoveSelected = () => {
     if (isEditable && onRemoveSelected && selectedBuildingId) {
+      console.log("Removing selected building:", selectedBuildingId);
       onRemoveSelected();
     }
   };

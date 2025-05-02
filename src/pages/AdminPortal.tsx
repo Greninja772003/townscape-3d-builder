@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import BuildingModal from "@/components/BuildingModal";
@@ -29,6 +29,21 @@ const AdminPortal = () => {
     setSelectedBuildingId
   } = useAdminGrid();
 
+  // Check for mobile portrait orientation
+  useEffect(() => {
+    if (isMobile) {
+      const checkOrientation = () => {
+        const isPortrait = window.matchMedia("(orientation: portrait)").matches;
+        setShowRotateAlert(isPortrait);
+      };
+      
+      checkOrientation();
+      
+      window.addEventListener("resize", checkOrientation);
+      return () => window.removeEventListener("resize", checkOrientation);
+    }
+  }, [isMobile]);
+
   const handleLogout = () => {
     window.location.href = '/';
     toast.success("Returned to view mode!");
@@ -40,6 +55,7 @@ const AdminPortal = () => {
   };
 
   const handleContextAddBuilding = (x: number, y: number) => {
+    console.log("Context menu triggered add building at:", x, y);
     setNewBuildingPos({ x, y });
     setIsModalOpen(true);
   };
@@ -52,27 +68,21 @@ const AdminPortal = () => {
     }
   };
 
-  // Check for mobile portrait orientation
-  useState(() => {
-    if (isMobile) {
-      const checkOrientation = () => {
-        const isPortrait = window.matchMedia("(orientation: portrait)").matches;
-        setShowRotateAlert(isPortrait);
-      };
-      
-      checkOrientation();
-      
-      window.addEventListener("resize", checkOrientation);
-      return () => window.removeEventListener("resize", checkOrientation);
-    }
-  });
-
   const handleAddBuildingSubmit = (imageUrl: string, _, name: string, scale = 1, fileName = null, redirectUrl?: string) => {
     if (newBuildingPos) {
+      console.log("Adding new building:", {
+        position: newBuildingPos,
+        imageUrl,
+        name,
+        scale,
+        redirectUrl
+      });
       const id = placeNewBuilding(imageUrl, 0, name, scale, fileName, redirectUrl, newBuildingPos);
       setIsModalOpen(false);
+      toast.success("Building added successfully!");
       return id;
     }
+    toast.error("Failed to determine building position");
     return "";
   };
 
