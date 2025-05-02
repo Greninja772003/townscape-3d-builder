@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useGridState } from "@/hooks/use-grid-state";
-import GridLayout from "@/components/GridLayout";
+import BuildingCanvas from "@/components/BuildingCanvas";
 import MobileRotateAlert from "@/components/MobileRotateAlert";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
@@ -43,7 +43,7 @@ const Index = () => {
         </Button>
       </div>
 
-      <GridLayout 
+      <BuildingCanvas 
         buildings={buildings}
         gridStyle={gridStyle}
       />

@@ -1,30 +1,22 @@
+
 import { useState, useEffect } from "react";
 import { Building } from "@/types/building";
 import { toast } from "sonner";
 import { STORAGE_KEYS } from "@/utils/buildingData";
-import { ROWS, COLS, MERGED_CELLS } from "@/constants/grid";
 
 export type BuildingsState = {
   [key: string]: Building;
 };
 
 export type GridStyleState = {
-  rotation: number;
-  scale: number;
-  marginBottom: number;
   perspective: number;
-  horizontalPosition: number;
   width: number;
   orientation: number;
 };
 
 export const DEFAULT_GRID_STYLE: GridStyleState = {
-  rotation: 30,
-  scale: 1.2,
-  marginBottom: 10,
   perspective: 1000,
-  horizontalPosition: 50,
-  width: 68,
+  width: 90,
   orientation: 0,
 };
 
@@ -34,6 +26,7 @@ export const useAdminGrid = () => {
     const saved = localStorage.getItem(STORAGE_KEYS.GRID_STYLE);
     return saved ? JSON.parse(saved) : DEFAULT_GRID_STYLE;
   });
+  const [selectedBuildingId, setSelectedBuildingId] = useState<string | null>(null);
 
   useEffect(() => {
     loadGridState();
@@ -79,46 +72,79 @@ export const useAdminGrid = () => {
 
   const placeNewBuilding = (
     imageUrl: string,
-    cellId: number,
+    id: number,
     name: string,
     scale: number = 1,
     fileName: string | null = null,
     redirectUrl?: string
   ) => {
-    const newBuilding = {
+    // Generate a unique ID for the building
+    const buildingId = `building-${Date.now()}`;
+    
+    const newBuilding: Building = {
+      id: buildingId,
       imageUrl,
-      cellId,
       name,
       scale,
       fileName,
       redirectUrl,
+      position: { 
+        x: window.innerWidth / 2, 
+        y: window.innerHeight / 2,
+        rotation: 0
+      }
     };
 
-    setBuildings((prev) => {
-      const updated = { ...prev };
-      updated[`cell-${cellId}`] = newBuilding;
+    setBuildings((prev) => ({
+      ...prev,
+      [buildingId]: newBuilding
+    }));
+    
+    setSelectedBuildingId(buildingId);
+    return buildingId;
+  };
+
+  const updateBuildingPosition = (buildingId: string, position: Partial<Building['position']>) => {
+    setBuildings(prev => {
+      if (!prev[buildingId]) return prev;
       
-      const mergedCell = MERGED_CELLS.find(m => m.primary === cellId);
-      if (mergedCell) {
-        updated[`cell-${mergedCell.secondary}`] = { ...newBuilding, cellId: mergedCell.secondary };
-      }
-      
-      return updated;
+      return {
+        ...prev,
+        [buildingId]: {
+          ...prev[buildingId],
+          position: {
+            ...prev[buildingId].position,
+            ...position
+          }
+        }
+      };
     });
   };
 
-  const removeBuilding = (cellId: number) => {
+  const updateBuildingScale = (buildingId: string, scale: number) => {
+    setBuildings(prev => {
+      if (!prev[buildingId]) return prev;
+      
+      return {
+        ...prev,
+        [buildingId]: {
+          ...prev[buildingId],
+          scale
+        }
+      };
+    });
+  };
+
+  const removeBuilding = (buildingId: string) => {
     setBuildings((prev) => {
       const updated = { ...prev };
-      delete updated[`cell-${cellId}`];
-      
-      const mergedCell = MERGED_CELLS.find(m => m.primary === cellId);
-      if (mergedCell) {
-        delete updated[`cell-${mergedCell.secondary}`];
-      }
-      
+      delete updated[buildingId];
       return updated;
     });
+    
+    if (selectedBuildingId === buildingId) {
+      setSelectedBuildingId(null);
+    }
     
     toast.success("Building removed successfully!");
   };
@@ -130,6 +156,10 @@ export const useAdminGrid = () => {
     saveGridState,
     resetGridStyle,
     placeNewBuilding,
+    updateBuildingPosition,
+    updateBuildingScale,
     removeBuilding,
+    selectedBuildingId,
+    setSelectedBuildingId
   };
 };
